@@ -337,6 +337,7 @@ function discordStartMessage() {
 }
 
 // Vérification signature Discord (Ed25519)
+/*
 import nacl from "tweetnacl";
 
 function verifyDiscordRequest(request, env) {
@@ -352,7 +353,7 @@ function verifyDiscordRequest(request, env) {
     Buffer.from(env.DISCORD_PUBLIC_KEY, "hex")
   );
 }
-
+*/
 
 /* =======================
    BUILD MESSAGE
