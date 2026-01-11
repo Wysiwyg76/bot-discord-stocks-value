@@ -1,0 +1,10 @@
+name = "bot-discord-stocks-value"
+main = "src/index.js"
+compatibility_date = "2026-01-01"
+
+kv_namespaces = [
+  { binding = "ASSET_CACHE", id = "decadd76dc5a469091816403a6ab95d4" }
+]
+
+[triggers]
+crons = ["0 20 * * 3"]

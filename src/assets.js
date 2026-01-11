@@ -1,0 +1,17 @@
+export const assetLabels = {
+  'WPEA.PA': { name: 'ETF Monde', currency: '€', group: 'global' },
+  'ESE.PA': { name: 'ETF S&P500', currency: '€', group: 'region' },
+  'VERX.AS': { name: 'ETF Europe', currency: '€', group: 'region' },
+  'PAASI.PA': { name: 'ETF Asie', currency: '€', group: 'region' },
+  'DBXJ.DE': { name: 'ETF Japon', currency: '€', group: 'country' },
+  'SXRW.DE': { name: 'ETF U.K.', currency: '€', group: 'country' },
+  '4BRZ.DE': { name: 'ETF Brésil', currency: '€', group: 'country' },
+  'SW2CHB.SW': { name: 'ETF Suisse', currency: 'CHF', group: 'country' },
+  'PPFB.DE': { name: 'ETC Gold', currency: '€', group: 'etc' },
+  'CO2.L': { name: 'ETC Carbon', currency: '€', group: 'etc' },
+  'COPA.L': { name: 'ETC Cuivre', currency: '$', group: 'etc' },
+  'BTC-USD': { name: 'Bitcoin', currency: '$', group: 'crypto' },
+  'ETH-USD': { name: 'Ethereum', currency: '$', group: 'crypto' },
+  'NVDA': { name: 'Nvidia', currency: '$', group: 'stocks' },
+  'MSTR': { name: 'Strategy', currency: '$', group: 'stocks' },
+};
