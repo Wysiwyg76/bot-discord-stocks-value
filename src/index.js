@@ -1,6 +1,8 @@
 import { env } from "cloudflare:workers";
 import { assetLabels } from './assets.js';
 
+
+
 /* =======================
    CONSTANTES & UTILS
 ======================= */
@@ -62,6 +64,10 @@ function getRemainingDaysInMonth() {
   return target - now;
 }
 
+
+const IS_GLOBAL = env.IS_GLOBAL === "true";
+
+/* TODO : pb Cold Start */
 const TTL = {
   PRICE: 24 * 60 * 60 * 1000, // 24h
   RSI_WEEKLY: getRemainingDaysInWeek(), // temps jusqu'à mardi 9h01
@@ -71,6 +77,8 @@ const TTL = {
 const now = () => Date.now();
 const isExpired = (ts, ttl) => !ts || now() - ts > ttl;
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+
 
 
 /* =======================
@@ -112,6 +120,8 @@ async function getPrice(symbol, env) {
   }
 }
 
+
+
 /* =======================
    RSI CALCULATOR
 ======================= */
@@ -145,6 +155,8 @@ function calculateRSIseries(closes, period = 14) {
 
   return rsi;
 }
+
+
 
 
 /* =======================
@@ -201,6 +213,8 @@ async function getRSI(symbol, interval, env) {
     return cached ?? null;
   }
 }
+
+
 
 /* =======================
    FORMATAGE MESSAGE
@@ -282,6 +296,7 @@ function assetsMessage(items) {
 }
 
 
+
 /* =======================
    DISCORD UTILS
 ======================= */
@@ -321,6 +336,24 @@ function discordStartMessage() {
   );
 }
 
+// Vérification signature Discord (Ed25519)
+import nacl from "tweetnacl";
+
+function verifyDiscordRequest(request, env) {
+  const signature = request.headers.get("x-signature-ed25519");
+  const timestamp = request.headers.get("x-signature-timestamp");
+  const body = request.body; // ArrayBuffer ou string
+  if (!signature || !timestamp) return false;
+
+  const message = new TextEncoder().encode(timestamp + body);
+  return nacl.sign.detached.verify(
+    message,
+    Buffer.from(signature, "hex"),
+    Buffer.from(env.DISCORD_PUBLIC_KEY, "hex")
+  );
+}
+
+
 /* =======================
    BUILD MESSAGE
 ======================= */
@@ -354,6 +387,57 @@ function buildFinalMessage(items) {
 }
 
 
+
+/* =======================
+   DEPLOY CMDS
+======================= */
+
+// Commandes à déployer
+const commands = [
+  { name: "start", description: "Démarre l'interaction avec le bot Stocks Value", type: 1 },
+  { name: "all", description: "Récapitulatif de tous les actifs", type: 1 },
+  {
+    name: "asset",
+    description: "Affiche un actif en particulier",
+    type: 1,
+    options: [
+      {
+        name: "id",
+        description: "Nom de l'actif",
+        type: 3,
+        required: true,
+      },
+    ],
+  },
+];
+
+// Déploiement automatique des commandes
+async function deployCommands(env) {
+  const BASE_URL = env.IS_GLOBAL
+    ? `https://discord.com/api/v10/applications/${env.DISCORD_APP_ID}/commands`
+    : `https://discord.com/api/v10/applications/${env.DISCORD_APP_ID}/guilds/${env.DISCORD_GUILD_ID}/commands`;
+
+  for (const cmd of commands) {
+    try {
+      const res = await fetch(BASE_URL, {
+        method: "POST",
+        headers: {
+          Authorization: `Bot ${env.DISCORD_BOT_TOKEN}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(cmd),
+      });
+      const data = await res.json();
+      if (res.ok) console.log(`✅ Commande enrôlée : /${cmd.name}`);
+      else console.error(`❌ Erreur /${cmd.name} :`, data);
+    } catch (err) {
+      console.error(`❌ Exception /${cmd.name} :`, err);
+    }
+  }
+}
+
+
+
 /* =======================
    WORKER
 ======================= */
@@ -362,11 +446,19 @@ export default {
   async fetch(req, env) {
     if (req.method !== 'POST') return new Response('OK');
 
+    // Déployer les commandes au démarrage (une seule fois par cold start)
+    if (!globalThis.commandsDeployed) {
+      await deployCommands(env);
+      globalThis.commandsDeployed = true;
+    }
+
     const interaction = await req.json();
 
     // Ping Discord
     if (interaction.type === 1) {
-      return Response.json({ type: 1 });
+      return new Response(JSON.stringify({ type: 1 }), {
+        headers: { "Content-Type": "application/json" },
+      });
     }
 
     const userId = interaction.member?.user?.id;

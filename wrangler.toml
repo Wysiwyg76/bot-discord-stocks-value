@@ -6,5 +6,8 @@ kv_namespaces = [
   { binding = "ASSET_CACHE", id = "decadd76dc5a469091816403a6ab95d4" }
 ]
 
+[vars]
+IS_GLOBAL = "false"
+
 [triggers]
 crons = ["0 20 * * 3"]
