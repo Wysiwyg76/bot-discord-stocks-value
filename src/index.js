@@ -372,7 +372,7 @@ export default {
     const userId = interaction.member?.user?.id;
     if (!userId) return new Response('OK');
 
-    /* à conserver ? */
+    /* à conserver ? 
     const allowed = env.ALLOWED_USER_IDS
       .split(',')
       .map(id => id.trim());
@@ -382,7 +382,7 @@ export default {
         type: 4,
         data: { content: 'Unauthorized' }
       });
-    }
+    }*/
 
     const command = interaction.data.name;
 
