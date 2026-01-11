@@ -445,13 +445,14 @@ async function deployCommands(env) {
 
 export default {
   async fetch(req, env) {
-    if (req.method !== 'POST') return new Response('OK');
 
     // Déployer les commandes au démarrage (une seule fois par cold start)
     if (!globalThis.commandsDeployed) {
       await deployCommands(env);
       globalThis.commandsDeployed = true;
     }
+
+    if (req.method !== 'POST') return new Response('OK');
 
     const interaction = await req.json();
 
