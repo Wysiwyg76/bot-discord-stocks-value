@@ -311,7 +311,7 @@ async function sendDiscordDM(userId, content, env) {
 }
 
 function discordStartMessage() {
-  const assets = Object.values(assetLabels).map(a => `• ${a.name}`).join('\n');
+  const assets = Object.values(assetLabels).map(a => `••${a.name}••`).join('\n');
 
   return (
     `Sélectionne un actif en utilisant la commande :\n` +
@@ -388,11 +388,6 @@ export default {
 
     if (command === 'start') {
       await sendDiscordDM(userId, discordStartMessage(), env);
-    }
-
-    if (command === 'list') {
-      var assets = Object.values(assetLabels).map(l=>[l.name]);
-      await sendDiscordDM(userId, `\n••`+assets.join(`••\n••`)+`••\n`, env);
     }
 
     if (command === 'all') {
